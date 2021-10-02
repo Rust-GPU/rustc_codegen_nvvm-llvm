@@ -8,7 +8,7 @@ build, especially older versions of LLVM. Therefore, we ship prebuilt compressed
 - `include/llvm` and `include/llvm-c`, these are required for building the LLVM shim.
 - `lib/*`, these are the actual `.lib` files we tell rustc to include when building the codegen.
 
-We do not include binaries because they aren't needed for us.
+We do not include binaries other than llvm-config because they aren't needed for us.
 
 The prebuilt libraries are pulled from the following locations:
 - linux-aarch64: LLVM prebuilt downloads 7.1.0, AArch64 Linux
