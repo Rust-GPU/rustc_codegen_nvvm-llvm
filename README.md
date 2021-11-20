@@ -11,10 +11,7 @@ build, especially older versions of LLVM. Therefore, we ship prebuilt compressed
 We do not include binaries other than llvm-config because they aren't needed for us.
 
 The prebuilt libraries are pulled from the following locations:
-- linux-aarch64: LLVM prebuilt downloads 7.1.0, AArch64 Linux
-- linux-x86_64: LLVM prebuilt downloads 7.1.0, Ubuntu 14.04
-- linux-x86: LLVM prebuilt downloads 7.1.0, FreeBSD11 i386
-- windows-x86_64: https://github.com/vovkos/llvm-package-windows llvm-7.1.0-windows-amd64-msvc15-msvcrt
-- windows-x86: https://github.com/vovkos/llvm-package-windows llvm-7.1.0-windows-x86-msvc15-msvcrt
+- linux-x86_64: LLVM prebuilt downloads 7.1.0, Ubuntu 14.04.
+- windows-x86_64: Built from source.
 
 We do not ship mac binaries because currently we only support CUDA 11 and up, and CUDA dropped MacOS support.
