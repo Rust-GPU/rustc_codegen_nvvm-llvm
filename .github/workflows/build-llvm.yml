@@ -1,0 +1,97 @@
+name: Build LLVM
+
+on:
+  workflow_dispatch:
+    inputs:
+      llvm_version:
+        description: LLVM version to build (e.g. 7.1.0 or 19.1.7)
+        required: true
+        default: 19.1.7
+      release:
+        description: Publish tarballs to a GitHub release tagged llvm-<version>
+        type: boolean
+        default: true
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-22.04
+            artifact: linux-x86_64
+          - os: windows-2022
+            artifact: windows-x86_64
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 360
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Linux build deps
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential cmake ninja-build python3 \
+            libffi-dev libedit-dev libncurses5-dev libxml2-dev \
+            zlib1g-dev xz-utils
+
+      - name: Build LLVM (Linux)
+        if: runner.os == 'Linux'
+        env:
+          LLVM_VERSION: ${{ inputs.llvm_version }}
+          INSTALL_PREFIX: ${{ github.workspace }}/install
+        run: ./scripts/build-llvm-linux.sh
+
+      - name: Build LLVM (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        env:
+          LLVM_VERSION: ${{ inputs.llvm_version }}
+          INSTALL_PREFIX: ${{ github.workspace }}\install
+        run: ./scripts/build-llvm-windows.ps1
+
+      - name: Package
+        shell: bash
+        env:
+          INSTALL_PREFIX: ${{ github.workspace }}/install
+          ARTIFACT_NAME: ${{ matrix.artifact }}
+        run: ./scripts/package-prebuilt.sh
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}-llvm-${{ inputs.llvm_version }}
+          path: ${{ matrix.artifact }}.tar.xz
+          if-no-files-found: error
+
+  release:
+    if: ${{ inputs.release }}
+    needs: build
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          pattern: '*-llvm-${{ inputs.llvm_version }}'
+          merge-multiple: true
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: llvm-${{ inputs.llvm_version }}
+          VERSION: ${{ inputs.llvm_version }}
+        run: |
+          set -euo pipefail
+          ls -lR artifacts
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$TAG" artifacts/*.tar.xz \
+              --repo "$GITHUB_REPOSITORY" --clobber
+          else
+            gh release create "$TAG" artifacts/*.tar.xz \
+              --repo "$GITHUB_REPOSITORY" \
+              --title "LLVM $VERSION" \
+              --notes "Prebuilt LLVM $VERSION for x86_64 Linux and Windows. Built by [build-llvm.yml](../../actions/workflows/build-llvm.yml) run #$GITHUB_RUN_NUMBER."
+          fi
