@@ -20,6 +20,8 @@ jobs:
         include:
           - os: ubuntu-22.04
             artifact: linux-x86_64
+          - os: ubuntu-22.04-arm
+            artifact: linux-aarch64
           - os: windows-2022
             artifact: windows-x86_64
     runs-on: ${{ matrix.os }}
@@ -93,5 +95,5 @@ jobs:
             gh release create "$TAG" artifacts/*.tar.xz \
               --repo "$GITHUB_REPOSITORY" \
               --title "LLVM $VERSION" \
-              --notes "Prebuilt LLVM $VERSION for x86_64 Linux and Windows. Built by [build-llvm.yml](../../actions/workflows/build-llvm.yml) run #$GITHUB_RUN_NUMBER."
+              --notes "Prebuilt LLVM $VERSION for Linux (x86_64, aarch64) and Windows (x86_64). Built by [build-llvm.yml](../../actions/workflows/build-llvm.yml) run #$GITHUB_RUN_NUMBER."
           fi
