@@ -1,0 +1,36 @@
+Backport upstream fix for LLVM bug #40712 to LLVM 7.x.
+
+Without explicit member initializers, MSVC does not treat the
+defaulted ManagedStaticBase constructor as constexpr, so the
+`AllSubCommands` ManagedStatic gets dynamic initialization that
+runs after every `cl::opt` static initializer — wiping the option
+list it was supposed to back. Result on modern MSVC: every cl::opt
+registered via cl::sub(*AllSubCommands) (i.e. -help, all of
+TableGen's -gen-* actions) silently disappears at runtime; only
+options not routed through ManagedStatic (-color, --version)
+survive. Linkers and link-time flags cannot work around this; the
+bug is in C++ initialization order.
+
+The MSVC STL's older internal workaround that masked this is gone
+as of recent VS 2019 / 2022 toolsets, which is why the previous
+LLVM 7 Windows tarball (built years ago) worked but rebuilds today
+do not.
+
+Upstream fix:   https://reviews.llvm.org/D80433
+Upstream issue: https://github.com/llvm/llvm-project/issues/40712
+
+--- a/include/llvm/Support/ManagedStatic.h
++++ b/include/llvm/Support/ManagedStatic.h
+@@ -38,9 +38,9 @@
+ protected:
+   // This should only be used as a static variable, which guarantees that this
+   // will be zero initialized.
+-  mutable std::atomic<void *> Ptr;
+-  mutable void (*DeleterFn)(void*);
+-  mutable const ManagedStaticBase *Next;
++  mutable std::atomic<void *> Ptr{nullptr};
++  mutable void (*DeleterFn)(void*) = nullptr;
++  mutable const ManagedStaticBase *Next = nullptr;
+ 
+   void RegisterManagedStatic(void *(*creator)(), void (*deleter)(void*)) const;
+ 
