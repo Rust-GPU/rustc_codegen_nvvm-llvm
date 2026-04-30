@@ -1,0 +1,5 @@
+/install/
+/build/
+/llvm-src/
+/*.tar.xz
+/prebuilt/
