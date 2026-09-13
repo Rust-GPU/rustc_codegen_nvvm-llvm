@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       llvm_version:
-        description: LLVM version to build (e.g. 7.1.0 or 19.1.7)
+        description: LLVM version to build (e.g. 7.1.0 or 21.1.8)
         required: true
-        default: 19.1.7
+        default: 21.1.8
       release:
         description: Publish tarballs to a GitHub release tagged llvm-<version>
         type: boolean

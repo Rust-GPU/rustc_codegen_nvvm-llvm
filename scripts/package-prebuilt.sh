@@ -6,7 +6,7 @@ set -euo pipefail
 #
 #   <ARTIFACT_NAME>/
 #     bin/llvm-config[.exe]
-#     bin/llvm-as[.exe]      (only used by the LLVM 19 build path)
+#     bin/llvm-as[.exe]      (only used by the modern LLVM build path)
 #     include/llvm/...
 #     include/llvm-c/...
 #     lib/*                  (static archives + shared libs on Linux)

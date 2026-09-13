@@ -5,13 +5,13 @@ set -euo pipefail
 # matching the layout that scripts/package-prebuilt.sh expects.
 #
 # Required env:
-#   LLVM_VERSION    e.g. 7.1.0 or 19.1.7
+#   LLVM_VERSION    e.g. 7.1.0 or 21.1.8
 #   INSTALL_PREFIX  absolute path; cmake --install target
 #
 # Optional env:
 #   WORK_DIR        where to extract sources (default: $PWD/llvm-src)
 
-: "${LLVM_VERSION:?LLVM_VERSION must be set (e.g. 7.1.0 or 19.1.7)}"
+: "${LLVM_VERSION:?LLVM_VERSION must be set (e.g. 7.1.0 or 21.1.8)}"
 : "${INSTALL_PREFIX:?INSTALL_PREFIX must be set}"
 
 ARCH=$(uname -m)
