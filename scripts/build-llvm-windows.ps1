@@ -4,7 +4,7 @@ $ErrorActionPreference = 'Stop'
 # $env:INSTALL_PREFIX matching the layout scripts/package-prebuilt.sh expects.
 #
 # Required env:
-#   LLVM_VERSION    e.g. 7.1.0 or 19.1.7
+#   LLVM_VERSION    e.g. 7.1.0 or 21.1.8
 #   INSTALL_PREFIX  absolute path; cmake --install target
 #
 # Notes on toolchain choice:
@@ -71,6 +71,11 @@ if (-not (Test-Path $srcDir)) {
         # FILE/DIR type, which it determines by stat'ing — fails when the
         # target hasn't been extracted yet). The build only needs llvm/,
         # cmake/, and third-party/, so extract just those three subtrees.
+        # LLVM 21 adds compatibility symlinks in mlgo-utils before their targets.
+        # Extract the Python package first so Git tar can materialize those links.
+        if ($llvmMajor -ge 21) {
+            Expand-LlvmTarball $tarball @("$srcDir/llvm/utils/mlgo-utils/mlgo")
+        }
         Expand-LlvmTarball $tarball @("$srcDir/llvm", "$srcDir/cmake", "$srcDir/third-party")
     }
 
